@@ -12,11 +12,11 @@
 
 #include "logic_data.h"
 
-#define LOGICDATA_RX_GPIO GPIO_NUM_25
-#define PIN_UP GPIO_NUM_27
-#define PIN_DOWN GPIO_NUM_26
-#define BUTTON_UP GPIO_NUM_21
-#define BUTTON_DOWN GPIO_NUM_19
+#define LOGICDATA_RX_GPIO CONFIG_LOGICDATA_RX_GPIO
+#define PIN_UP CONFIG_PIN_UP_GPIO
+#define PIN_DOWN CONFIG_PIN_DOWN_GPIO
+#define BUTTON_UP CONFIG_BUTTON_UP_GPIO
+#define BUTTON_DOWN CONFIG_BUTTON_DOWN_GPIO
 
 #define PIN_LEVEL_ASSERTED 1
 #define PIN_LEVEL_DEASSERTED 0
@@ -140,11 +140,12 @@ static void btn_down_long_press_up_cb(void *arg, void *usr_data)
 void app_main(void)
 {
     // button_config_t btn_cfg = {
-    //     .long_press_time = 1000,
-    //     .short_press_time = 50,
+    //     .long_press_time = CONFIG_BUTTON_LONG_PRESS_TIME,
+    //     .short_press_time = CONFIG_BUTTON_SHORT_PRESS_TIME,
     // };
 
     button_config_t btn_cfg = {0};
+
     const button_gpio_config_t btn_up_gpio_cfg = {
         .gpio_num = BUTTON_UP,
         .active_level = BUTTON_LEVEL_ACTIVE,
@@ -207,13 +208,13 @@ void app_main(void)
     };
     esp_timer_handle_t timer;
     esp_timer_create(&timer_args, &timer);
-    esp_timer_start_periodic(timer, 100000); // 100ms
+    esp_timer_start_periodic(timer, CONFIG_HEIGHT_READ_INTERVAL * 1000); // Convert ms to microseconds
 
     // Table does not send height when it is not moving
     // so we need to trigger it by asserting and deasserting the pins
-    // for 500ms
+    // for CONFIG_INITIAL_MOVEMENT_DELAY ms
     gpio_set_level(PIN_UP, PIN_LEVEL_ASSERTED);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(CONFIG_INITIAL_MOVEMENT_DELAY));
     gpio_set_level(PIN_UP, PIN_LEVEL_DEASSERTED);
 
     while (1) {
@@ -248,6 +249,6 @@ void app_main(void)
         }
 
         ESP_LOGD(TAG, "Main loop sleeping for 100ms...");
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(CONFIG_MAIN_LOOP_DELAY));
     }
 }

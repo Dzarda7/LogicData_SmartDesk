@@ -1,0 +1,9 @@
+# This file was generated using idf.py save-defconfig. It can be edited manually.
+# Espressif IoT Development Framework (ESP-IDF) 6.0.0 Project Minimal Configuration
+#
+CONFIG_IDF_TARGET="esp32"
+LOGICDATA_RX_GPIO=10
+PIN_UP_GPIO=27
+PIN_DOWN_GPIO=26
+BUTTON_UP_GPIO=21
+BUTTON_DOWN_GPIO=19
