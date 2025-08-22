@@ -1,0 +1,109 @@
+menu "LogicData SmartDesk Configuration"
+
+    menu "GPIO Pin Configuration"
+        config LOGICDATA_RX_GPIO
+            int "LogicData RX GPIO Pin"
+            range 0 48
+            default 10
+            help
+                GPIO pin number for receiving data from LogicData height sensor.
+                This is an INPUT pin that receives serial data from the sensor.
+                Default: GPIO 10
+
+        config PIN_UP_GPIO
+            int "Up Movement Control GPIO Pin"
+            range 0 48
+            default 2
+            help
+                GPIO pin number for controlling UP movement of the desk.
+                This is an OUTPUT pin that sends control signals to the desk controller.
+                When asserted, it commands the desk to move upward.
+                Default: GPIO 2
+
+        config PIN_DOWN_GPIO
+            int "Down Movement Control GPIO Pin"
+            range 0 48
+            default 3
+            help
+                GPIO pin number for controlling DOWN movement of the desk.
+                This is an OUTPUT pin that sends control signals to the desk controller.
+                When asserted, it commands the desk to move downward.
+                Default: GPIO 3
+
+        config BUTTON_UP_GPIO
+            int "Up Button GPIO Pin"
+            range 0 48
+            default 0
+            help
+                GPIO pin number for the UP button input.
+                This is an INPUT pin that detects when the up button is pressed.
+                Default: GPIO 0
+
+        config BUTTON_DOWN_GPIO
+            int "Down Button GPIO Pin"
+            range 0 48
+            default 1
+            help
+                GPIO pin number for the DOWN button input.
+                This is an INPUT pin that detects when the down button is pressed.
+                Default: GPIO 1
+    endmenu
+
+    menu "Button Configuration"
+
+        config BUTTON_LONG_PRESS_TIME
+            int "Button Long Press Time (ms)"
+            range 100 10000
+            default 1000
+            help
+                Time in milliseconds to hold a button for it to be considered a long press.
+                Default: 1000ms (1 second)
+
+        config BUTTON_SHORT_PRESS_TIME
+            int "Button Short Press Time (ms)"
+            range 10 1000
+            default 50
+            help
+                Minimum time in milliseconds for a button press to be registered.
+                Default: 50ms
+    endmenu
+
+    menu "Height Control Configuration"
+
+        config THRESHOLD_HEIGHT_DIFF
+            int "Height Difference Threshold (cm)"
+            range 1 10
+            default 1
+            help
+                Minimum height difference in centimeters to consider heights as different.
+                Used for height preset management.
+                Default: 1cm
+    endmenu
+
+    menu "Timing Configuration"
+        config HEIGHT_READ_INTERVAL
+            int "Height Read Interval (ms)"
+            range 50 1000
+            default 100
+            help
+                Interval in milliseconds between height sensor readings.
+                Default: 100ms
+
+        config MAIN_LOOP_DELAY
+            int "Main Loop Delay (ms)"
+            range 50 1000
+            default 100
+            help
+                Delay in milliseconds between main loop iterations.
+                Default: 100ms
+
+        config INITIAL_MOVEMENT_DELAY
+            int "Initial Movement Delay (ms)"
+            range 100 2000
+            default 500
+            help
+                Duration in milliseconds for initial desk movement to trigger height sensor.
+                Default: 500ms
+    endmenu
+
+endmenu
