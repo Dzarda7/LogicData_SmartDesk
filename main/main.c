@@ -9,6 +9,9 @@
 #include "esp_timer.h"
 #include "iot_button.h"
 #include "button_gpio.h"
+#include "nvs_flash.h"
+#include "nvs.h"
+#include "esp_check.h"
 
 #include "logic_data.h"
 
@@ -25,20 +28,86 @@
 
 #define THRESHOLD_HEIGHT_DIFF 1
 
+// NVS configuration
+#define NVS_NAMESPACE "smartdesk"
+#define NVS_KEY_LOW_HEIGHT "low_height"
+#define NVS_KEY_HIGH_HEIGHT "high_height"
+
 static const char *TAG = "LogicData";
 
 static logicdata_ctx_t *ld = NULL;
 
 static volatile uint8_t height = 0;
 
-static volatile uint8_t low_height = 0;
-static volatile uint8_t high_height = 0;
+static uint8_t low_height = 0;
+static uint8_t high_height = 0;
 
 static volatile bool go_to_height_active = false;
 static volatile uint8_t go_to_height = 0;
 
 static volatile bool btn_up_pressed = false;
 static volatile bool btn_down_pressed = false;
+
+// NVS functions
+static esp_err_t nvs_save_preset_heights(void)
+{
+    nvs_handle_t nvs_handle;
+    esp_err_t err;
+
+    ESP_RETURN_ON_ERROR(nvs_open(NVS_NAMESPACE, NVS_READWRITE, &nvs_handle), TAG, "Error opening NVS");
+
+    err = nvs_set_u8(nvs_handle, NVS_KEY_LOW_HEIGHT, low_height);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Error saving low height: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    err = nvs_set_u8(nvs_handle, NVS_KEY_HIGH_HEIGHT, high_height);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Error saving high height: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    ESP_RETURN_ON_ERROR(nvs_commit(nvs_handle), TAG, "Error committing NVS");
+
+    nvs_close(nvs_handle);
+    ESP_LOGI(TAG, "Preset heights saved to NVS: low=%u, high=%u", low_height, high_height);
+    return ESP_OK;
+}
+
+static esp_err_t nvs_load_preset_heights(void)
+{
+    nvs_handle_t nvs_handle;
+    esp_err_t err;
+
+    ESP_RETURN_ON_ERROR(nvs_open(NVS_NAMESPACE, NVS_READONLY, &nvs_handle), TAG, "Error opening NVS");
+
+    err = nvs_get_u8(nvs_handle, NVS_KEY_LOW_HEIGHT, &low_height);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGW(TAG, "Low height not found in NVS, using default 0");
+        low_height = 0;
+    } else if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Error reading low height: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    err = nvs_get_u8(nvs_handle, NVS_KEY_HIGH_HEIGHT, &high_height);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGW(TAG, "High height not found in NVS, using default 0");
+        high_height = 0;
+    } else if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Error reading high height: %s", esp_err_to_name(err));
+        nvs_close(nvs_handle);
+        return err;
+    }
+
+    nvs_close(nvs_handle);
+    ESP_LOGI(TAG, "Preset heights loaded from NVS: low=%u, high=%u", low_height, high_height);
+    return ESP_OK;
+}
 
 static void handle_height_preset_change(uint8_t height)
 {
@@ -62,6 +131,12 @@ static void handle_height_preset_change(uint8_t height)
         } else {
             high_height = height;
         }
+    }
+
+    // Save the updated preset heights to NVS
+    esp_err_t err = nvs_save_preset_heights();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to save preset heights to NVS: %s", esp_err_to_name(err));
     }
 }
 
@@ -146,6 +221,21 @@ static void btn_down_long_press_up_cb(void *arg, void *usr_data)
 
 void app_main(void)
 {
+    // Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+    ESP_LOGI(TAG, "NVS initialized successfully");
+
+    // Load preset heights from NVS
+    ret = nvs_load_preset_heights();
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Failed to load preset heights from NVS, using defaults");
+    }
+
     // button_config_t btn_cfg = {
     //     .long_press_time = CONFIG_BUTTON_LONG_PRESS_TIME,
     //     .short_press_time = CONFIG_BUTTON_SHORT_PRESS_TIME,
@@ -158,7 +248,7 @@ void app_main(void)
         .active_level = BUTTON_LEVEL_ACTIVE,
     };
     button_handle_t btn_up;
-    esp_err_t ret = iot_button_new_gpio_device(&btn_cfg, &btn_up_gpio_cfg, &btn_up);
+    ret = iot_button_new_gpio_device(&btn_cfg, &btn_up_gpio_cfg, &btn_up);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Button up create failed: %d", (int)ret);
         return;
@@ -219,9 +309,9 @@ void app_main(void)
 
     // Table does not send height when it is not moving
     // so we need to trigger it by asserting and deasserting the pins
-    // for CONFIG_INITIAL_MOVEMENT_DELAY ms
+    // for 100ms
     gpio_set_level(PIN_UP, PIN_LEVEL_ASSERTED);
-    vTaskDelay(pdMS_TO_TICKS(CONFIG_INITIAL_MOVEMENT_DELAY));
+    vTaskDelay(pdMS_TO_TICKS(100)); // 100ms
     gpio_set_level(PIN_UP, PIN_LEVEL_DEASSERTED);
 
     while (1) {
@@ -256,6 +346,6 @@ void app_main(void)
         }
 
         ESP_LOGD(TAG, "Main loop sleeping for 100ms...");
-        vTaskDelay(pdMS_TO_TICKS(CONFIG_MAIN_LOOP_DELAY));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

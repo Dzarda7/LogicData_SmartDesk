@@ -89,21 +89,6 @@ menu "LogicData SmartDesk Configuration"
                 Interval in milliseconds between height sensor readings.
                 Default: 100ms
 
-        config MAIN_LOOP_DELAY
-            int "Main Loop Delay (ms)"
-            range 50 1000
-            default 100
-            help
-                Delay in milliseconds between main loop iterations.
-                Default: 100ms
-
-        config INITIAL_MOVEMENT_DELAY
-            int "Initial Movement Delay (ms)"
-            range 100 2000
-            default 500
-            help
-                Duration in milliseconds for initial desk movement to trigger height sensor.
-                Default: 500ms
     endmenu
 
 endmenu
