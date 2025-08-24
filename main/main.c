@@ -43,9 +43,16 @@ static volatile bool btn_down_pressed = false;
 static void handle_height_preset_change(uint8_t height)
 {
     if (low_height == 0) {
+        // store the new height as the low height first if both haven't been set yet
         low_height = height;
     } else if (high_height == 0) {
-        high_height = height;
+        // low was already set, we need to make sure that the new height is higher than the low height
+        if (height > low_height) {
+            high_height = height;
+        } else {
+            high_height = low_height;
+            low_height = height;
+        }
     } else {
         // calculate distance to low and high height
         uint8_t dist_to_low = (height > low_height) ? (height - low_height) : (low_height - height);
