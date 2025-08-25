@@ -52,13 +52,6 @@ static bool ld_peek(struct logicdata_ctx *s, ld_index_t index, uint32_t *out)
     return ok;
 }
 
-static void ld_drop(struct logicdata_ctx *s, ld_index_t n)
-{
-    portENTER_CRITICAL(&s->spin);
-    s->tail = (s->tail + n) % LOGICDATA_TRACE_HISTORY_MAX;
-    portEXIT_CRITICAL(&s->spin);
-}
-
 static void IRAM_ATTR logicdata_gpio_isr(void *arg)
 {
     struct logicdata_ctx *s = (struct logicdata_ctx *)arg;
@@ -160,11 +153,6 @@ static uint8_t reverse_nibble(uint8_t in)
 static uint8_t reverse_byte(uint8_t in)
 {
     return (uint8_t)((reverse_nibble(in) << 4) | reverse_nibble((uint8_t)(in >> 4)));
-}
-
-static uint16_t reverse_word(uint16_t in)
-{
-    return (uint16_t)((reverse_byte((uint8_t)in) << 8) | reverse_byte((uint8_t)(in >> 8)));
 }
 
 bool logicdata_is_valid(uint32_t msg)

@@ -81,7 +81,18 @@ Wire the original control buttons or create your own button interface:
 - Real-time height monitoring and logging
 - Automatic height presets (learns your preferred positions)
 - Smooth automatic positioning to saved heights
-- Non-volatile preset storage (survives power cycles)
+- **Non-volatile preset storage (NVS)** - preset heights are automatically saved and persist across power cycles
+- **Automatic preset management** - presets are updated and saved whenever you set new positions
+
+## NVS Storage
+
+The SmartDesk controller uses ESP32's Non-Volatile Storage (NVS) to persistently store preset heights:
+
+- **Automatic Saving**: Preset heights are automatically saved to NVS whenever they are updated
+- **Persistent Storage**: Presets survive power cycles, firmware updates, and system resets
+- **Namespace**: Uses "smartdesk" namespace for organized storage
+- **Keys**: Stores "low_height" and "high_height" as 8-bit values
+- **Error Handling**: Graceful fallback to defaults if NVS operations fail
 
 ## Protocol Information
 
