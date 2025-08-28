@@ -47,14 +47,14 @@ Controller pinout is shown in the picture below
 
 ![Controller pinout](/images/controller-pinout.png)
 
-| LOGICDATA Pin  | ESP32 GPIO | Description                          |
-| -------------- | ---------- | ------------------------------------ |
-| Pin 1 (5V)     | VIN/5V     | 5V Power Supply                      |
-| Pin 2 (GND)    | GND        | Ground                               |
-| Pin 3 (UP)     | GPIO 27    | UP control signal                    |
-| Pin 4 (DOWN)   | GPIO 26    | DOWN control signal                  |
-| Pin 5 (Serial) | GPIO 25    | Serial communication (receive only)  |
-| Pin 6 (GND)    | GND        | Ground (optional, additional ground) |
+| LOGICDATA Pin | ESP32 GPIO | Description                          |
+| ------------- | ---------- | ------------------------------------ |
+| 5V            | VIN/5V     | 5V Power Supply                      |
+| GND           | GND        | Ground                               |
+| UP            | GPIO 27    | UP control signal                    |
+| DOWN          | GPIO 26    | DOWN control signal                  |
+| Serial        | GPIO 25    | Serial communication (receive only)  |
+| GND           | GND        | Ground (optional, additional ground) |
 
 ### Control Buttons Side (from original handset)
 
