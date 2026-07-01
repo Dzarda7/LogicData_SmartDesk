@@ -37,35 +37,23 @@ This project implements a passive listener that intercepts the serial communicat
 
 ### Connection Diagram
 
-```
-[Control Buttons] ←→ [ESP32] ←→ [Desk Controller]
-```
-
-### Desk Controller Side (to table controller)
+### Desk Controller Side (table controller unit)
 
 Controller pinout is shown in the picture below
 
 ![Controller pinout](/images/controller-pinout.png)
 
-| LOGICDATA Pin | ESP32 GPIO | Description                          |
-| ------------- | ---------- | ------------------------------------ |
-| 5V            | VIN/5V     | 5V Power Supply                      |
-| GND           | GND        | Ground                               |
-| UP            | GPIO 27    | UP control signal                    |
-| DOWN          | GPIO 26    | DOWN control signal                  |
-| Serial        | GPIO 25    | Serial communication (receive only)  |
-| GND           | GND        | Ground (optional, additional ground) |
+### Wiring diagram
 
-### Control Buttons Side (from original handset)
+![wiring](/images/SmartDesk_wiring.png)
 
-Wire the original control buttons or create your own button interface:
+Every connector visualization is the front (as looking directly into the connector)
 
-| Button Function | ESP32 GPIO | Description                         |
-| --------------- | ---------- | ----------------------------------- |
-| UP Button       | GPIO 21    | Connect button between GPIO and GND |
-| DOWN Button     | GPIO 19    | Connect button between GPIO and GND |
-| 5V              | VIN/5V     | Power supply for ESP32              |
-| GND             | GND        | Ground connection                   |
+#### Troubleshooting
+
+- Check all the wires are connected - from the destination to the source is 0 Ω
+- Check if all the wires are not touching themselves - if made in the air instead of breadboard use "onion isolation"
+- Check if the correct wires are wired - the faces of connectors changes as a female/male connector
 
 ## Features
 
